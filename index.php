@@ -58,28 +58,37 @@
                 // Conectar ao banco de dados (substitua com suas configurações)
                 $servername = "localhost";
                 $username = "root";
-                $password = "1234";
+                $password = "";
                 $database = "hospital";
 
-                $conn = new mysqli($servername, $username, $password, $database);
+                try {
+                    $conn = new PDO("mysql:host=$servername;dbname=$database", $username, $password);
+                    // Definir o modo de erro do PDO para exceção
+                    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // Verificar a conexão
-                if ($conn->connect_error) {
-                    die("Conexão falhou: " . $conn->connect_error);
-                }
+                    // Preparar a declaração SQL
+                    $stmt = $conn->prepare("INSERT INTO paciente (nome, senha, cpf, data_nascimento, email) VALUES (:nome, :senha, :cpf, :data_nascimento, :email)");
+                    
+                    // Vincular os parâmetros
+                    $stmt->bindParam(':nome', $nome);
+                    $stmt->bindParam(':senha', $senha);
+                    $stmt->bindParam(':cpf', $cpf);
+                    $stmt->bindParam(':data_nascimento', $data_nascimento);
+                    $stmt->bindParam(':email', $email);
 
-                // Inserir dados na tabela paciente
-                $sql = "INSERT INTO paciente (nome, senha, cpf, data_nascimento, email) VALUES ('$nome', '$senha', '$cpf', '$data_nascimento', '$email')";
+                    // Executar a declaração
+                    $stmt->execute();
 
-                if ($conn->query($sql) === TRUE) {
                     echo "Cadastro bem-sucedido";
-                } else {
-                    echo "Erro ao cadastrar: " . $conn->error;
+                } catch(PDOException $e) {
+                    echo "Erro ao cadastrar: " . $e->getMessage();
                 }
 
-                $conn->close();
+                // Fechar a conexão
+                $conn = null;
             }
-            ?>
+?>
+
         </aside>
         
         <article>
