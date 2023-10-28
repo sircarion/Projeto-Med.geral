@@ -1,19 +1,22 @@
 <?php
 $servername = "localhost";
-$username = "hospital";
-$password = "1234";
+$username = "root";
+$password = "";
 $dbname = "hospital";
 
-// Conectar ao banco de dados
-$conn = new mysqli($servername, $username, $password, $dbname);
+try {
+    // Conectar ao banco de dados
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    // Definir o modo de erro do PDO para exceção
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Verificar a conexão
-if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error);
+    echo "Conexão bem-sucedida";
+} catch(PDOException $e) {
+    echo "Conexão falhou: " . $e->getMessage();
 }
 
 // Agora você está conectado ao banco de dados e pode executar consultas SQL aqui
 
 // Fechar a conexão quando terminar
-$conn->close();
+$conn = null;
 ?>
