@@ -46,39 +46,41 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['crm'])) {
-        require 'conexão.php'; 
+        require 'conexao.php'; 
 
         // Lógica de login
         $crm = $_POST['crm'];
         $username = $_POST['usuario'];
         $password = $_POST['senha'];
 
-        $sql = "SELECT * FROM medicos WHERE crm = ?";
+        $sql = "SELECT * FROM medicos WHERE crm = :crm";
 
-        // Preparar a declaração
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $crm);
+        try {
+            // Preparar a declaração
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':crm', $crm);
 
-        // Executar a consulta
-        $stmt->execute();
-        $result = $stmt->get_result();
+            // Executar a consulta
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result->num_rows === 1) {
-            $row = $result->fetch_assoc();
-
-            if (password_verify($password, $row['senha'])) {
-                // Login bem-sucedido, redirecione para a página principal
-                header("Location: pagina_principal.php");
-                exit();
+            if ($result) {
+                if (password_verify($password, $result['senha'])) {
+                    // Login bem-sucedido, redirecione para a página principal
+                    header("Location: pagina_principal.php");
+                    exit();
+                } else {
+                    echo "Senha incorreta";
+                }
             } else {
-                echo "Senha incorreta";
+                echo "CRM não encontrado";
             }
-        } else {
-            echo "CRM não encontrado";
+        } catch(PDOException $e) {
+            echo "Erro: " . $e->getMessage();
         }
 
-        $stmt->close();
-        $conn->close();
+        // Fechar a conexão
+        $conn = null;
     }
 }
 ?>
